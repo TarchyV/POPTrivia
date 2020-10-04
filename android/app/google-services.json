@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "1035868144224",
+    "firebase_url": "https://poptrivia-2aa50.firebaseio.com",
+    "project_id": "poptrivia-2aa50",
+    "storage_bucket": "poptrivia-2aa50.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1035868144224:android:ad46789801059f099cb905",
+        "android_client_info": {
+          "package_name": "com.valleeapps.poptrivia"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1035868144224-mccrf2n646ferb26c9rqjjcl6plg2dim.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBludnvE7_PVbT6xhO_M725lDvNbsXfWv0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1035868144224-mccrf2n646ferb26c9rqjjcl6plg2dim.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
