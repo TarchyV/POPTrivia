@@ -5,6 +5,7 @@ import 'package:poptrivia/my_theme.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 
 class LobbyPage extends StatefulWidget {
@@ -40,17 +41,21 @@ Widget buttonGroup(){
       children: [
 
      MyTheme().button('Join', (){
-       
+       if(name.length>=1){
         print('Going to Join Page...');
+
+       }
         
      } ),
     MyTheme().button('Create', (){
-
-      print('Goin to Create Page...');
+      if(name.length >= 1){
+     print('Goin to Create Page...');
       Navigator.push(context, PageTransition(
         type: PageTransitionType.rightToLeft,
         child: CreatePage(name)
       ));
+      }
+ 
     } )
 
     ],),

@@ -1,15 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:poptrivia/game.dart';
 import 'package:poptrivia/my_theme.dart';
 import 'package:poptrivia/dbHandler.dart';
 import 'package:poptrivia/my_theme.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:poptrivia/trivaHandler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:page_transition/page_transition.dart';
+
+import 'dbHandler.dart';
+import 'my_theme.dart';
+import 'my_theme.dart';
+import 'my_theme.dart';
 
 
 class CreatePage extends StatefulWidget{
-  String hostName;
+  final String hostName;
   CreatePage(this.hostName);
   @override
   State<StatefulWidget> createState() => _CreatePage();
@@ -66,8 +74,17 @@ int roomNum = 0;
                ),
              
                 Text('Share This Code With Your Friends!'),
+                  FutureBuilder(builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+                      if(snapshot.connectionState == ConnectionState.waiting){
+                        return Container();
+                      }
 
-                  CreateOptions(widget.hostName, roomNum)
+                      return CreateOptions(widget.hostName, roomNum);
+
+                   },
+                   
+                   future: Future.delayed(Duration(milliseconds: 400)),
+                   )
 
 
 
@@ -109,6 +126,23 @@ class _CreateOptions extends State<CreateOptions>{
       DBHandler().fillOptions(widget.roomNum, category, difficulty, amount.toInt());
   }
 
+
+void _startGame(){
+
+if(category.length < 2){
+
+}else{
+ Navigator.push(context, PageTransition(
+        type: PageTransitionType.rightToLeft,
+        child: Game(widget.roomNum)
+      ));
+}
+
+
+
+}
+
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -125,11 +159,11 @@ class _CreateOptions extends State<CreateOptions>{
                       decoration: new BoxDecoration(
                         border: Border(
                           top: BorderSide(
-                          color: MyTheme().titleTextColor(),
+                          color: Colors.grey[800],
                           width: 2
                           ),
                           bottom:  BorderSide(
-                          color: MyTheme().titleTextColor(),
+                          color: Colors.grey[800],
                           width: 2
                           ),
                         
@@ -147,6 +181,7 @@ class _CreateOptions extends State<CreateOptions>{
                                      setState(() {
                                       category =  TriviaHandler().categories[index];
                                       selected = true;
+                                      pushOptions();
                                      });
                                   },
                                   child: Container(
@@ -176,6 +211,7 @@ class _CreateOptions extends State<CreateOptions>{
                       onPressed: (){
                         setState(() {
                          selected = false; 
+                         
                         });
                       },
                     )
@@ -190,6 +226,7 @@ class _CreateOptions extends State<CreateOptions>{
                                 onTap: (){
                                   setState(() {
                                    difficulty = 0; 
+                                   pushOptions();
                                   });
                                 },
                                 child: AnimatedContainer(
@@ -219,6 +256,7 @@ class _CreateOptions extends State<CreateOptions>{
                                 onTap: (){
                                   setState(() {
                                    difficulty = 1; 
+                                   pushOptions();
                                   });
                                 },
                                 child: AnimatedContainer(
@@ -248,6 +286,7 @@ class _CreateOptions extends State<CreateOptions>{
                                 onTap: (){
                                   setState(() {
                                    difficulty = 2; 
+                                   pushOptions();
                                   });
                                 },
                                 child: AnimatedContainer(
@@ -287,11 +326,49 @@ class _CreateOptions extends State<CreateOptions>{
                            (double value) { 
                              setState(() {
                               amount=value; 
+                              pushOptions();
                              });
                             },
                           value: amount,
                         ),
-                    PlayersWaiting()
+                    PlayersWaiting(widget.roomNum),
+
+                            Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: InkWell(
+                                onTap: (){
+                                  //START GAME
+                                  _startGame();
+                                },
+                                child: AnimatedContainer(
+                                duration: Duration(milliseconds: 200),
+                                height: 50,
+                                width: 200,
+                                decoration: new BoxDecoration(
+                                  color: Colors.grey[800],
+                                  borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                    color: MyTheme().titleTextColor(),
+                                    width: 2
+                                  )
+                                ),
+                                child: Center(child: 
+                                Text('Start',
+                                style: GoogleFonts.anton(
+                                  color: MyTheme().titleTextColor(),
+                                  fontSize: 28,
+                                   shadows: [
+                                  Shadow(
+                                    color: Colors.black,
+                                    offset: Offset(1,2)
+                                  )
+                                        ] 
+                                ),
+                                )),
+                              ),
+                            ),
+                          ),
+
                     ],
                   )
                 );
@@ -299,18 +376,81 @@ class _CreateOptions extends State<CreateOptions>{
 }
 
 class PlayersWaiting extends StatefulWidget{
+  final int roomNum;
+  PlayersWaiting(this.roomNum);
   @override
   State<StatefulWidget> createState() => _PlayersWaiting();
 
 }
 
 class _PlayersWaiting extends State<PlayersWaiting>{
+  DatabaseReference _ref = new FirebaseDatabase().reference();
+
+List<String> players = new List();
+@override
+  void initState() {
+    getPlayers();
+    _ref.child('Rooms').child(widget.roomNum.toString()).child('Players').onChildAdded.listen((event) {
+      print(event);
+      getPlayers();
+    });
+    super.initState();
+  }
+
+
+  Future<void> getPlayers() async{
+    setState(() {
+      
+    });
+   players = await DBHandler().getPlayers(widget.roomNum);
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Container(
-        height: 75,
+        height: 105,
+        width: 400,
       decoration: BoxDecoration(
-        color: Colors.grey
+      ),
+      child: Column(
+        children: [
+          Text('${players.length}/8 Players!'),
+          FutureBuilder(builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) { 
+            if(snapshot.connectionState == ConnectionState.waiting){
+              return Container();
+            }
+            return Container(
+            height: 70,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: players.length,
+              itemBuilder: (BuildContext context, int index) {
+              return Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Container(
+                  width: 150,
+                  decoration: new BoxDecoration(
+                    color: MyTheme().titleTextColor(),
+                    borderRadius: BorderRadius.circular(12)
+                  ),
+                  child: Center(child: Text('${players[index]}',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.abel(
+
+                  ),
+                  
+                  )),
+                ),
+              );
+            }),
+          );
+           },
+           future: getPlayers(),
+           )
+         
+
+        ],
       ),
     );
   }

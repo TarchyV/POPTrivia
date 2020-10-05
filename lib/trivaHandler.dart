@@ -12,6 +12,8 @@
 //https://opentdb.com/api.php?amount=10&category=17&difficulty=medium&type=multiple
 
 
+import 'dart:convert';
+
 import 'package:http/http.dart' as http;
 
 class TriviaHandler {
@@ -52,15 +54,30 @@ return categories;
 
 Future<Map<dynamic,dynamic>> createTrivia(int amount, int category, int difficulty) async{
 
-Map<dynamic,dynamic> questions = new Map();
+  //IMPORTANT IMPORTANT IMPORTANT IMPORTANT
+//ONLY HOST NEEDS TO DO THIS, THEN THE HOST PUSHES IT TO THE DATABASE FOR ALL OTHER PLAYERS TO SEE
 
-String url = 'https://opentdb.com/api.php?amount=${amount.toString()}&category=${category.toString()}&difficulty=${difficulty.toString()}&type=multiple';
+String d = 'easy';
+switch (difficulty) {
+  case 0:
+    d = 'easy';
+    break;
+  case 1:
+    d = 'medium';
+    break;    
+      case 2:
+    d = 'hard';
+    break;
+  default:
+}
 
+String url = 'https://opentdb.com/api.php?amount=${amount.toString()}&category=${category.toString()}&difficulty=$d&type=multiple';
+print(url);
 var response = await http.post(url);
 
-print(response);
-
-
+final temp = json.decode(response.body) as Map;
+List<dynamic> data = temp['results'];
+return data.asMap();
 }
 
 

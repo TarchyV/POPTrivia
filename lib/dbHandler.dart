@@ -40,10 +40,47 @@ void fillOptions(int roomNum,String categrory, int difficulty, int amount ){
 
 }
 
+Future<String> getCategory(int roomNum) async{
+  String c = '';
+await _ref.child('Rooms').child(roomNum.toString()).child('Category').once().then((value) {
+  c = value.value;
+});
+return c;
+}
+Future<String> getAmount(int roomNum) async{
+  String a = '';
+await _ref.child('Rooms').child(roomNum.toString()).child('Amount').once().then((value) {
+  a = value.value;
+});
+return a;
+}
+Future<String> getDifficulty(int roomNum) async{
+  String d = '';
+await _ref.child('Rooms').child(roomNum.toString()).child('Difficulty').once().then((value) {
+  d = value.value;
+});
+return d;
+}
+
+Future<List<String>> getPlayers(int roomNum) async{
+  List<String> pList = new List();
+  await _ref.child('Rooms').child(roomNum.toString()).child('Players').once().then((value) {
+    Map<dynamic,dynamic> x = value.value;
+    x.forEach((key, value) {
+      if(!pList.contains(key)){
+        pList.add(key);
+      }
+    });
+  });
+  print(pList);
+  return pList;
+}
+
 
 Future<bool> checkNum(int n) async{
 List<String> roomNums = new List();
 bool unique = false;
+
 await _ref.child('Rooms').once().then((DataSnapshot data){
 
 Map<dynamic,dynamic> result = data.value;
@@ -66,6 +103,4 @@ if(roomNums.contains(n.toString())){
 
 return unique;
 }
-
-
 }
