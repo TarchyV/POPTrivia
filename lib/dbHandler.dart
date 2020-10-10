@@ -103,4 +103,18 @@ if(roomNums.contains(n.toString())){
 
 return unique;
 }
+
+Future<void> pushTriva(List<String> questions, int roomNum) async {
+await _ref.child('Rooms').child(roomNum.toString()).child('Questions').set(questions);
+
+
+
+}
+
+
+
+
+
+
+
 }

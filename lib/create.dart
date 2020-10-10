@@ -134,7 +134,7 @@ if(category.length < 2){
 }else{
  Navigator.push(context, PageTransition(
         type: PageTransitionType.rightToLeft,
-        child: Game(widget.roomNum)
+        child: Game(widget.roomNum, true)
       ));
 }
 
