@@ -15,7 +15,6 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-
 class TriviaHandler {
 var categories =[ 
 'General Knowledge : 9',
@@ -76,7 +75,7 @@ print(url);
 var response = await http.post(url);
 
 final temp = json.decode(response.body) as Map;
-List<dynamic> data = temp['results'];
+List<dynamic> data = (temp['results']);
 return data.asMap();
 }
 

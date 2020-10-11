@@ -18,14 +18,94 @@ if(!unique){
   _ref.child('Rooms').child(roomNum.toString()).update({
     'host': host
    });
-   _ref.child('Rooms').child(roomNum.toString()).child('Players').update({
-    host: 0.toString()
+   _ref.child('Rooms').child(roomNum.toString()).child('Players').child(host).update({
+    'locked': ''
    });
-
+_ref.child('Rooms').child(roomNum.toString()).child('Players').child(host).update({
+    'Score': 0
+   });
 }
 return roomNum;
 }
 
+Future<void> addPoints(int roomNum, String name, int points) async {
+int score = 0;
+await _ref.child('Rooms').child(roomNum.toString()).child('Players').child(name).once().then((DataSnapshot data){
+
+  var temp = data.value.toString();
+      score = int.parse(temp.substring(temp.indexOf('Score: ') + 7, temp.length-1)) + points;
+});
+await _ref.child('Rooms').child(roomNum.toString()).child('Players').child(name).update({
+'Score': score
+});
+
+}
+
+
+Future<int> getPoints(int roomNum, String name) async {
+int points = 0;
+await _ref.child('Rooms').child(roomNum.toString()).child('Players').child(name).once().then((DataSnapshot data){
+
+  var temp = data.value.toString();
+      points = int.parse(temp.substring(temp.indexOf('Score: ') + 7, temp.length-1));
+});
+
+return points;
+
+}
+
+
+Future<bool> isLocked(int roomNum, String name) async {
+
+bool isLocked = false;
+ await _ref.child('Rooms').child(roomNum.toString()).child('Players').child(name).child('locked').once().then((DataSnapshot data){
+      if(data.value.toString().length > 0){
+        isLocked = true;
+      }else{
+        isLocked = false;
+      }
+
+  });
+  return isLocked;
+}
+
+
+Future<void> lockIn(int roomNum, String name, String answer) async {
+await _ref.child('Rooms').child(roomNum.toString()).child('Players').child(name).update({
+
+'locked': answer
+
+});
+
+}
+Future<void> lockOut(int roomNum, String name) async {
+await _ref.child('Rooms').child(roomNum.toString()).child('Players').child(name).update({
+
+'locked': ''
+
+});
+}
+
+void deleteRoom(int roomNum){
+   _ref.child('Rooms').child(roomNum.toString()).remove();
+}
+
+
+Future<bool> isCorrect(int roomNum, String name) async {
+
+bool correct = false;
+await _ref.child('Rooms').child(roomNum.toString()).child('Players').child(name).once().then((DataSnapshot data){
+
+  if(data.value.toString().substring(data.value.toString().indexOf('locked: '),  data.value.toString().indexOf(', Score:')).contains('Answer')){
+    correct = true;
+  }
+
+
+});
+
+return correct;
+
+}
 
 
 void fillOptions(int roomNum,String categrory, int difficulty, int amount ){
@@ -64,6 +144,10 @@ return d;
 
 Future<List<String>> getPlayers(int roomNum) async{
   List<String> pList = new List();
+  try {
+    
+  } catch (e) {
+  }
   await _ref.child('Rooms').child(roomNum.toString()).child('Players').once().then((value) {
     Map<dynamic,dynamic> x = value.value;
     x.forEach((key, value) {
@@ -72,7 +156,6 @@ Future<List<String>> getPlayers(int roomNum) async{
       }
     });
   });
-  print(pList);
   return pList;
 }
 

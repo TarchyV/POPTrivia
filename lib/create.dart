@@ -39,12 +39,21 @@ int roomNum = 0;
   }
 
   Future<int> _createRoom() async{
+  if(roomNum ==0){
   roomNum = await DBHandler().createRoom(widget.hostName);
+  }
   return roomNum;
   }
 
+  Future<void> _delRoom(int roomnum) async{
+  DBHandler().deleteRoom(roomNum);
+  }
 
-
+@override
+void dispose() { 
+  _delRoom(roomNum);
+  super.dispose();
+}
 
   @override
   Widget build(BuildContext context) {
@@ -112,6 +121,7 @@ class _CreateOptions extends State<CreateOptions>{
   String category = '';
   int difficulty = 0;
   double amount  = 10;
+  List<String> players = new List();
   //0 = Easy
   //1 = Medium
   //2 = Hard
@@ -134,12 +144,9 @@ if(category.length < 2){
 }else{
  Navigator.push(context, PageTransition(
         type: PageTransitionType.rightToLeft,
-        child: Game(widget.roomNum, true)
+        child: Game(widget.roomNum, true, widget.hostName, players)
       ));
 }
-
-
-
 }
 
 
@@ -334,7 +341,7 @@ if(category.length < 2){
                     PlayersWaiting(widget.roomNum),
 
                             Padding(
-                            padding: const EdgeInsets.all(8.0),
+                            padding: const EdgeInsets.all(2.0),
                             child: InkWell(
                                 onTap: (){
                                   //START GAME
@@ -342,8 +349,8 @@ if(category.length < 2){
                                 },
                                 child: AnimatedContainer(
                                 duration: Duration(milliseconds: 200),
-                                height: 50,
-                                width: 200,
+                                height: 40,
+                                width: 150,
                                 decoration: new BoxDecoration(
                                   color: Colors.grey[800],
                                   borderRadius: BorderRadius.circular(12),
@@ -356,7 +363,7 @@ if(category.length < 2){
                                 Text('Start',
                                 style: GoogleFonts.anton(
                                   color: MyTheme().titleTextColor(),
-                                  fontSize: 28,
+                                  fontSize: 24,
                                    shadows: [
                                   Shadow(
                                     color: Colors.black,
@@ -399,17 +406,17 @@ List<String> players = new List();
 
 
   Future<void> getPlayers() async{
-    setState(() {
-      
+    setState(() async {
+         players = await DBHandler().getPlayers(widget.roomNum);
+        _CreateOptions().players = players;
     });
-   players = await DBHandler().getPlayers(widget.roomNum);
   }
 
 
   @override
   Widget build(BuildContext context) {
     return Container(
-        height: 105,
+        height: 85,
         width: 400,
       decoration: BoxDecoration(
       ),
@@ -421,7 +428,7 @@ List<String> players = new List();
               return Container();
             }
             return Container(
-            height: 70,
+            height: 50,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               itemCount: players.length,
