@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:poptrivia/create.dart';
 import 'package:poptrivia/my_theme.dart';
-import 'package:animate_do/animate_do.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:page_transition/page_transition.dart';
-import 'package:audioplayers/audioplayers.dart';
+
+import 'join.dart';
 
 
 class LobbyPage extends StatefulWidget {
@@ -43,7 +41,10 @@ Widget buttonGroup(){
      MyTheme().button('Join', (){
        if(name.length>=1){
         print('Going to Join Page...');
-
+        Navigator.push(context, PageTransition(
+                type: PageTransitionType.rightToLeft,
+                child: Join(name)
+              ));
        }
         
      } ),

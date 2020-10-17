@@ -1,18 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:poptrivia/game.dart';
 import 'package:poptrivia/my_theme.dart';
 import 'package:poptrivia/dbHandler.dart';
-import 'package:poptrivia/my_theme.dart';
-import 'package:animate_do/animate_do.dart';
 import 'package:poptrivia/trivaHandler.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:page_transition/page_transition.dart';
 
 import 'dbHandler.dart';
-import 'my_theme.dart';
-import 'my_theme.dart';
+import 'game/game.dart';
 import 'my_theme.dart';
 
 
@@ -34,9 +29,11 @@ class _CreatePage extends State<CreatePage>{
 int roomNum = 0;
   @override
   void initState() {
+
     super.initState();
     
   }
+  
 
   Future<int> _createRoom() async{
   if(roomNum ==0){
@@ -144,7 +141,7 @@ if(category.length < 2){
 }else{
  Navigator.push(context, PageTransition(
         type: PageTransitionType.rightToLeft,
-        child: Game(widget.roomNum, true, widget.hostName, players)
+        child: Game(widget.roomNum, true, widget.hostName, amount.toInt())
       ));
 }
 }
@@ -398,18 +395,22 @@ List<String> players = new List();
   void initState() {
     getPlayers();
     _ref.child('Rooms').child(widget.roomNum.toString()).child('Players').onChildAdded.listen((event) {
-      print(event);
       getPlayers();
     });
     super.initState();
   }
 
 
-  Future<void> getPlayers() async{
-    setState(() async {
-         players = await DBHandler().getPlayers(widget.roomNum);
-        _CreateOptions().players = players;
-    });
+  Future<List<String>> getPlayers() async{
+        setState(() async {
+                  players= await DBHandler().getPlayers(widget.roomNum);
+
+        });
+        setState(() {
+          
+        });
+    
+    return players;
   }
 
 

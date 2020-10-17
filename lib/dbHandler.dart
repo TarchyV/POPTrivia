@@ -1,4 +1,3 @@
-import 'dart:collection';
 
 import 'package:firebase_database/firebase_database.dart';
 import 'dart:math';
@@ -8,14 +7,94 @@ class DBHandler {
 DatabaseReference _ref = new FirebaseDatabase().reference();
 
 
+
+Future<void> pushTitle(int roomNum, String title) async {
+
+  await _ref.child('Rooms').child(roomNum.toString()).update({
+    'Title' : title
+   });
+
+}
+Future<String> getTitle(int roomNum) async {
+  String t = '';
+  await _ref.child('Rooms').child(roomNum.toString()).child('Title').once().then((DataSnapshot data){
+
+      t = data.value;
+
+  });
+  return t;
+}
+
+
+Future<void> questionNum(int questionNum, int questionLength, int roomNum) async {
+
+  await _ref.child('Rooms').child(roomNum.toString()).update({
+    'onQuestion' : questionNum
+   });
+
+}
+Future<int> getQuestionNum(int roomNum) async {
+  int questionNum = 0;
+  await _ref.child('Rooms').child(roomNum.toString()).child('onQuestion').once().then((DataSnapshot data){
+
+    questionNum = data.value;
+
+  });
+return questionNum;
+}
+
+
+
+Future<String> joinRoom(String name, String roomNum) async {
+String errorText = 'Success';
+bool notValid = true;
+int n = int.parse(roomNum);
+notValid = await checkNum(n);
+if(notValid){
+  errorText = "Room Number Doesn't exist";
+}else{
+
+
+await getPlayers(n).then((value){
+print(value);
+print(name);
+if(value.length == 8){
+errorText = 'Lobby Is Full...';
+}else{
+if(value.contains(name)){
+errorText = 'Name already exists in this lobby';
+}else{
+errorText = 'Success';
+}
+}
+
+
+});
+
+
+}
+
+
+
+return errorText;
+}
+
+
+
+
+
+
+
 Future<int> createRoom(String host) async{
 var r = new Random();
+var timestamp = DateTime.now();
 int roomNum = r.nextInt(999999);
 bool unique = await checkNum(roomNum);
 if(!unique){
   createRoom(host);
 }else{
   _ref.child('Rooms').child(roomNum.toString()).update({
+    'TS': timestamp.toString(),
     'host': host
    });
    _ref.child('Rooms').child(roomNum.toString()).child('Players').child(host).update({
@@ -27,6 +106,18 @@ _ref.child('Rooms').child(roomNum.toString()).child('Players').child(host).updat
 }
 return roomNum;
 }
+
+Future<void> addPlayer(int roomNum, String name) async {
+
+await _ref.child('Rooms').child(roomNum.toString()).child('Players').child(name).update({
+
+'Score':0,
+'locked':''
+
+});
+
+}
+
 
 Future<void> addPoints(int roomNum, String name, int points) async {
 int score = 0;
@@ -144,21 +235,18 @@ return d;
 
 Future<List<String>> getPlayers(int roomNum) async{
   List<String> pList = new List();
-  try {
-    
-  } catch (e) {
-  }
-  await _ref.child('Rooms').child(roomNum.toString()).child('Players').once().then((value) {
+
+   await _ref.child('Rooms').child(roomNum.toString()).child('Players').once().then((value) {
     Map<dynamic,dynamic> x = value.value;
     x.forEach((key, value) {
-      if(!pList.contains(key)){
+
         pList.add(key);
-      }
+      
     });
   });
+  print(pList);
   return pList;
 }
-
 
 Future<bool> checkNum(int n) async{
 List<String> roomNums = new List();
