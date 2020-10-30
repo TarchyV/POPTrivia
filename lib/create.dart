@@ -29,11 +29,9 @@ class _CreatePage extends State<CreatePage>{
 int roomNum = 0;
   @override
   void initState() {
-
     super.initState();
     
   }
-  
 
   Future<int> _createRoom() async{
   if(roomNum ==0){

@@ -50,7 +50,7 @@ List<bool> lockList = [false];
   bool allPlayersLocked = false;
   @override
   void initState() {
-    getPlayers();
+getPlayers();
     if(widget.host){
 
       getTrivia();
@@ -98,7 +98,7 @@ List<bool> lockList = [false];
           });
 
          });
-        //  print(players);
+        print(players);
     return players;
   }
 
@@ -126,13 +126,17 @@ splitData(questions[questionNum]);
 
 Future<void> nextQuestion() async{
 
+if(widget.host){
+await DBHandler().questionNum(questionNum + 1, widget.amount, widget.roomNum);
+}
+
 questionNum = await DBHandler().getQuestionNum(widget.roomNum);
 
-setState(() {
- questionNum = questionNum + 1; 
-});
 
-await DBHandler().questionNum(questionNum, widget.amount, widget.roomNum);
+  
+
+
+
 
 
 
@@ -211,7 +215,8 @@ builder: (BuildContext context){
 
 ): print('gameisover');
 
-!gameOver? Future.delayed(Duration(seconds: 3)).then((value){
+!gameOver? Future.delayed(Duration(seconds: 2)).then((value){
+correct = false;
 Navigator.pop(context);
 }):print('gameisover');
 
@@ -234,7 +239,7 @@ Future<void> introAnim() async{
                 setState(() {
                 gameOver = true; 
                 });
-              print('GAME OVER');
+              print('WEEEEEEEEEEEEEEEEEEEE GAME OVER???@!');
               addPoints();
                 Navigator.push(context, PageTransition(
             type: PageTransitionType.rightToLeft,
@@ -362,18 +367,6 @@ void startTimer() {
 
 
 
-// @override
-// void dispose() {
-//   _timer.cancel();
-//   DBHandler().deleteRoom(widget.roomNum);
-//   super.dispose();
-// }
-
-
-
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -415,7 +408,14 @@ void startTimer() {
                   ],
                 ),
               ),
-              Center(child: Text('${questionNum + 1} / ${widget.amount}')),
+              FutureBuilder(
+                future: DBHandler().getQuestionNum(widget.roomNum),
+                initialData: 1,
+                builder: (BuildContext context, AsyncSnapshot snapshot) {
+                  return Center(child: Text('${snapshot.data + 1} / ${widget.amount}'));
+                },
+              ),
+              
               Center(
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -432,7 +432,15 @@ void startTimer() {
                           color: Colors.black
                         ),
                         textAlign: TextAlign.center,
-                        child: Text(title),
+                        child: 
+                        FutureBuilder(
+                          future:  DBHandler().getTitle(widget.roomNum),
+                          initialData: 'loading...',
+                          builder: (BuildContext context, AsyncSnapshot snapshot) {
+                            return Text(snapshot.data);
+                          },
+                        ),
+                        
                         
                         
                     ),
@@ -513,7 +521,7 @@ void startTimer() {
                 width: 300,
                 child: GridView.builder(
          gridDelegate:new SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4),
-         itemCount: lockList.length,
+         itemCount: players.length,
          itemBuilder: (BuildContext context, int index) {
          return Padding(
          padding: const EdgeInsets.fromLTRB(8, 12, 8, 2),
@@ -527,18 +535,26 @@ void startTimer() {
          color: !lockList[index]? Colors.black: Colors.green,
          ),
 
-         Text(players[index]),
+     Text(players[index]),
+
+   
+      
          FutureBuilder(
            future: DBHandler().getPoints(widget.roomNum, players[index]),
            
            builder: (BuildContext context, AsyncSnapshot snapshot) {
-             return Text(snapshot.data.toString(),
-               style: GoogleFonts.dmSans(
-                 fontWeight: FontWeight.bold
+             if(snapshot.hasData){
+              return Text(snapshot.data.toString(),
+                            style: GoogleFonts.dmSans(
+                              fontWeight: FontWeight.bold
 
-               ),
-                 
-               );
+                            ),
+                              
+                            );
+             }else{
+               return Container();
+             }
+            
            },
         
          ),
